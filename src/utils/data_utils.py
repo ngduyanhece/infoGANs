@@ -90,10 +90,9 @@ def plot_generated_batch(X_real, generator_model, batch_size, cat_dim, noise_dim
 
     # Generate images
     y_cat = sample_cat(batch_size, cat_dim)
-    y_cont = sample_noise(noise_scale, batch_size, cont_dim)
     noise_input = sample_noise(noise_scale, batch_size, noise_dim)
     # Produce an output
-    X_gen = generator_model.predict([y_cat, y_cont, noise_input],batch_size=batch_size)
+    X_gen = generator_model.predict([y_cat, noise_input],batch_size=batch_size)
 
     X_real = inverse_normalization(X_real)
     X_gen = inverse_normalization(X_gen)

@@ -6,6 +6,7 @@ from keras.utils import generic_utils
 from keras.optimizers import Adam, SGD
 # Utils
 sys.path.append("../utils")
+import general_utils
 import data_utils
 
 def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
@@ -16,8 +17,10 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
 
     args: **kwargs (dict) keyword arguments that specify the model hyperparameters
     """
+    general_utils.setup_logging("IG")
     # Load and rescale data
     if dset == "mnist":
+        print("loading mnist data")
         X_real_train, _, _, _ = data_utils.load_mnist()
 
     img_dim = X_real_train.shape[-3:]
@@ -93,13 +96,13 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
             print('Epoch %s/%s, Time: %s' % (e + 1, nb_epoch, time.time() - start))
 
             if e % 5 == 0:
-                gen_weights_path = os.path.join('../../models/gen_weights_epoch%s.h5' % (e))
+                gen_weights_path = os.path.join('../../models/IG/gen_weights_epoch%s.h5' % (e))
                 generator_model.save_weights(gen_weights_path, overwrite=True)
 
-                disc_weights_path = os.path.join('../../models/disc_weights_epoch%s.h5' % (e))
+                disc_weights_path = os.path.join('../../models/IG/disc_weights_epoch%s.h5' % (e))
                 discriminator_model.save_weights(disc_weights_path, overwrite=True)
 
-                DCGAN_weights_path = os.path.join('../../models/DCGAN_weights_epoch%s.h5' % (e))
+                DCGAN_weights_path = os.path.join('../../models/IG/DCGAN_weights_epoch%s.h5' % (e))
                 DCGAN_model.save_weights(DCGAN_weights_path, overwrite=True)
 
     except KeyboardInterrupt:
