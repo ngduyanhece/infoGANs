@@ -29,7 +29,6 @@ def generator_upsampling(cat_dim, noise_dim, img_dim, model_name="generator_upsa
         nb_upconv = 4
 
     reshape_shape = (start_dim, start_dim, f)
-    bn_axis = -1
     output_channels = img_dim[-1]
 
     cat_input = Input(shape=cat_dim, name="cat_input")
@@ -52,7 +51,7 @@ def generator_upsampling(cat_dim, noise_dim, img_dim, model_name="generator_upsa
         x = UpSampling2D(size=(2, 2))(x)
         nb_filters = int(f / (2 ** (i + 1)))
         x = Conv2D(nb_filters, (3, 3), padding="same")(x)
-        x = BatchNormalization(axis=bn_axis)(x)
+        x = BatchNormalization()(x)
         x = Activation("relu")(x)
 
     x = Conv2D(output_channels, (3, 3), name="gen_Conv2D_final", padding="same", activation='tanh')(x)
@@ -84,7 +83,6 @@ def generator_deconv(cat_dim, noise_dim, img_dim, batch_size, model_name="genera
         nb_upconv = 4
 
     reshape_shape = (start_dim, start_dim, f)
-    bn_axis = -1
     output_channels = img_dim[-1]
 
     cat_input = Input(shape=cat_dim, name="cat_input")
@@ -108,7 +106,7 @@ def generator_deconv(cat_dim, noise_dim, img_dim, batch_size, model_name="genera
         s = start_dim * (2 ** (i + 1))
         o_shape = (batch_size, s, s, nb_filters)
         x = Deconv2D(nb_filters, (3, 3), output_shape=o_shape, strides=(2, 2), padding="same")(x)
-        x = BatchNormalization(mode=2, axis=bn_axis)(x)
+        x = BatchNormalization()(x)
         x = Activation("relu")(x)
 
     # Last block
@@ -132,8 +130,6 @@ def DCGAN_discriminator(cat_dim, img_dim, model_name="DCGAN_discriminator", dset
     returns : model (keras NN) the Neural Net model
     """
 
-    bn_axis = -1
-
     disc_input = Input(shape=img_dim, name="discriminator_input")
 
     if dset == "mnist":
@@ -150,7 +146,7 @@ def DCGAN_discriminator(cat_dim, img_dim, model_name="DCGAN_discriminator", dset
     for i, f in enumerate(list_f):
         name = "disc_Conv2D_%s" % (i + 2)
         x = Conv2D(f, (3, 3), strides=(2, 2), name=name, padding="same")(x)
-        x = BatchNormalization(axis=bn_axis)(x)
+        x = BatchNormalization()(x)
         x = LeakyReLU(0.2)(x)
 
     x = Flatten()(x)
@@ -166,7 +162,7 @@ def DCGAN_discriminator(cat_dim, img_dim, model_name="DCGAN_discriminator", dset
     x_Q_Y = Dense(cat_dim[0], activation='softmax', name="Q_cat_out")(x_Q)
 
     # Create discriminator model
-    x_disc = Dense(2, activation='softmax', name="disc_out")(x)
+    x_disc = Dense(1, activation='sigmoid', name="disc_out")(x)
     discriminator_model = Model(inputs=[disc_input], outputs=[x_disc, x_Q_Y], name=model_name)
 
     return discriminator_model
@@ -187,25 +183,25 @@ def DCGAN(generator, discriminator_model, cat_dim, noise_dim):
     return DCGAN
 
 
-def load(model_name, cat_dim, cont_dim, noise_dim, img_dim, bn_mode, batch_size, dset="mnist", use_mbd=False):
+def load(model_name, cat_dim, noise_dim, img_dim, batch_size, dset="mnist"):
 
     if model_name == "generator_upsampling":
         model = generator_upsampling(cat_dim, noise_dim, img_dim, model_name=model_name, dset=dset)
         model.summary()
-        from keras.utils import plot_model
-        plot_model(model, to_file='../../figures/%s.png' % model_name, show_shapes=True, show_layer_names=True)
+        # from keras.utils import plot_model
+        # plot_model(model, to_file='../../figures/%s.png' % model_name, show_shapes=True, show_layer_names=True)
         return model
     if model_name == "generator_deconv":
         model = generator_deconv(cat_dim, noise_dim, img_dim, batch_size, model_name=model_name, dset=dset)
         model.summary()
-        from keras.utils import plot_model
-        plot_model(model, to_file='../../figures/%s.png' % model_name, show_shapes=True, show_layer_names=True)
+        # from keras.utils import plot_model
+        # plot_model(model, to_file='../../figures/%s.png' % model_name, show_shapes=True, show_layer_names=True)
         return model
     if model_name == "DCGAN_discriminator":
         model = DCGAN_discriminator(cat_dim, img_dim, model_name=model_name, dset=dset)
         model.summary()
-        from keras.utils import plot_model
-        plot_model(model, to_file='../../figures/%s.png' % model_name, show_shapes=True, show_layer_names=True)
+        # from keras.utils import plot_model
+        # plot_model(model, to_file='../../figures/%s.png' % model_name, show_shapes=True, show_layer_names=True)
         return model
 
 

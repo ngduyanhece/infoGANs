@@ -2,3 +2,5 @@
 ./data
 .idea
 ./figures
+__pycache__/
+../utils/__pycache__/
