@@ -87,7 +87,7 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
 
                 # Save images for visualization
                 if batch_counter % (n_batch_per_epoch / 2) == 0:
-                    data_utils.plot_generated_batch(X_real_batch, generator_model, batch_size, cat_dim, noise_dim)
+                    data_utils.plot_generated_batch(X_real_batch, generator_model, batch_size, cat_dim, noise_dim,e)
 
                 if batch_counter >= n_batch_per_epoch:
                     break

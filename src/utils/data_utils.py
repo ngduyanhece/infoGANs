@@ -86,7 +86,7 @@ def get_gen_batch(batch_size, cat_dim, noise_dim, noise_scale=0.5):
 
     return X_gen, y_gen, y_cat
 
-def plot_generated_batch(X_real, generator_model, batch_size, cat_dim, noise_dim, noise_scale=0.5):
+def plot_generated_batch(X_real, generator_model, batch_size, cat_dim, noise_dim, counter, noise_scale=0.5):
 
     # Generate images
     y_cat = sample_cat(batch_size, cat_dim)
@@ -111,6 +111,6 @@ def plot_generated_batch(X_real, generator_model, batch_size, cat_dim, noise_dim
         plt.imshow(Xr[:, :, 0], cmap="gray")
     else:
         plt.imshow(Xr)
-    plt.savefig("../../figures/current_batch.png")
+    plt.savefig("../../figures/current_batch_%s.png" %(counter))
     plt.clf()
     plt.close()
