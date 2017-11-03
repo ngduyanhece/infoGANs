@@ -6,7 +6,6 @@ from keras.utils import generic_utils
 from keras.optimizers import Adam, SGD
 # Utils
 sys.path.append("../utils")
-import numpy as np
 import general_utils
 import data_utils
 

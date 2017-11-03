@@ -2,7 +2,8 @@ from keras.datasets import mnist
 from keras.utils import np_utils
 import numpy as np
 import h5py
-
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pylab as plt
 
 
