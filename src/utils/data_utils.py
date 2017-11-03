@@ -54,37 +54,44 @@ def sample_cat(batch_size, cat_dim):
     y[np.arange(batch_size), random_y] = 1
     return y
 
-def get_disc_batch(X_real_batch, generator_model, batch_counter, batch_size, cat_dim, noise_dim, noise_scale=0.5,label_smoothing=True):
+def get_disc_batch(X_real_batch, Y_real_batch, generator_model, batch_counter, batch_size, cat_dim, noise_dim, noise_scale=0.5,label_smoothing=True):
 
     # Create X_disc: alternatively only generated or real images
     if batch_counter % 2 == 0:
         # Pass noise to the generator
-        y_cat = sample_cat(batch_size, cat_dim)
+        # y_cat = sample_cat(batch_size, cat_dim)
+        # get some labels of the X_real_batch
+        # batch_slice = int(batch_size/2)
+        # y_cat[0:batch_slice,:] = Y_real_batch[0:batch_slice,:]
         noise_input = sample_noise(noise_scale, batch_size, noise_dim)
         # Produce an output
-        X_disc = generator_model.predict([y_cat, noise_input],batch_size=batch_size)
+        X_disc = generator_model.predict([Y_real_batch, noise_input],batch_size=batch_size)
         y_disc = np.zeros((X_disc.shape[0], 1), dtype=np.uint8)
         # y_disc[:, 0] = 1
     else:
+        # batch_slice = int(batch_size / 2)
         X_disc = X_real_batch
         y_disc = np.zeros((X_disc.shape[0], 1), dtype=np.uint8)
-        y_cat = sample_cat(batch_size, cat_dim)
+        # y_cat = sample_cat(batch_size, cat_dim)
+        # y_cat[0:batch_slice, :] = Y_real_batch[0:batch_slice, :]
         if label_smoothing:
             y_disc[:, 0] = np.random.uniform(low=0.9, high=1, size=y_disc.shape[0])
         else:
             y_disc[:, 0] = 1
 
-    return X_disc, y_disc, y_cat
+    # return X_disc, y_disc, y_cat
+    return X_disc, y_disc
 
 def get_gen_batch(batch_size, cat_dim, noise_dim, noise_scale=0.5):
 
     X_gen = sample_noise(noise_scale, batch_size, noise_dim)
     y_gen = np.zeros((X_gen.shape[0], 1), dtype=np.uint8)
     # y_gen[:, 0] = 1
-
-    y_cat = sample_cat(batch_size, cat_dim)
-
-    return X_gen, y_gen, y_cat
+    # batch_slice = int(batch_size / 2)
+    # y_cat = sample_cat(batch_size, cat_dim)
+    # y_cat[0:batch_slice, :] = Y_real_batch[0:batch_slice, :]
+    # return X_gen, y_gen, y_cat
+    return X_gen, y_gen
 
 def plot_generated_batch(X_real, generator_model, batch_size, cat_dim, noise_dim, counter, noise_scale=0.5):
 
@@ -114,3 +121,7 @@ def plot_generated_batch(X_real, generator_model, batch_size, cat_dim, noise_dim
     plt.savefig("../../figures/current_batch_%s.png" %(counter))
     plt.clf()
     plt.close()
+def accuracy(p_y,y):
+    labels = np.argmax(y,axis=1)
+    p_labels = np.argmax(p_y)
+    return np.mean(p_labels == labels)
