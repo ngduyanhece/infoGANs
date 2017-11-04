@@ -80,14 +80,14 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
                 # Unfreeze the discriminator
                 discriminator_model.trainable = True
                 # training validation
-                p_real, p_Y_train = discriminator_model.predict(X_real_batch, batch_size=batch_size)
-                acc_train = data_utils.accuracy(p_Y_train, Y_real_train)
+                p_real_batch, p_Y_batch = discriminator_model.predict(X_real_batch, batch_size=batch_size)
+                acc_train = data_utils.accuracy(p_Y_batch, Y_real_batch)
                 batch_counter += 1
                 progbar.add(batch_size, values=[("D tot", disc_loss[0]),
                                                 ("D cat", disc_loss[2]),
                                                 ("G tot", gen_loss[0]),
                                                 ("G cat", gen_loss[2]),
-                                                ("P Real:", p_real),
+                                                ("P Real:", p_real_batch),
                                                 ("Q acc", acc_train)])
 
                 # Save images for visualization
