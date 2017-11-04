@@ -2,6 +2,7 @@ import os
 import sys
 import time
 import models as models
+import keras
 from keras.utils import generic_utils
 from keras.optimizers import Adam, SGD
 # Utils
@@ -59,10 +60,10 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
         print("Start training")
         for e in range(nb_epoch+1):
             # Initialize progbar and batch counter
-            progbar = generic_utils.Progbar(epoch_size)
+            # progbar = generic_utils.Progbar(epoch_size)
             batch_counter = 1
             start = time.time()
-
+            print("Epoch: {}".format(e))
             for X_real_batch,Y_real_batch in zip(data_utils.gen_batch(X_real_train, batch_size),data_utils.gen_batch(Y_real_train, batch_size)):
 
                 # Create a batch to feed the discriminator model
@@ -85,15 +86,15 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
                 p_real_batch, p_Y_batch = discriminator_model.predict(X_real_batch, batch_size=batch_size)
                 acc_train = data_utils.accuracy(p_Y_batch, Y_real_batch)
                 batch_counter += 1
-                progbar.add(batch_size, values=[("D tot", disc_loss[0]),
-                                                ("D cat", disc_loss[2]),
-                                                ("G tot", gen_loss[0]),
-                                                ("G cat", gen_loss[2]),
-                                                ("P Real:", p_real_batch),
-                                                ("Q acc", acc_train)])
+                # progbar.add(batch_size, values=[("D tot", disc_loss[0]),
+                #                                 ("D cat", disc_loss[2]),
+                #                                 ("G tot", gen_loss[0]),
+                #                                 ("G cat", gen_loss[2]),
+                #                                 ("P Real:", p_real_batch),
+                #                                 ("Q acc", acc_train)])
 
                 # Save images for visualization
-                if batch_counter % (n_batch_per_epoch / 2) == 0 and e % 100 == 0:
+                if batch_counter % (n_batch_per_epoch / 2) == 0 and e % 10 == 0:
                     data_utils.plot_generated_batch(X_real_batch, generator_model, batch_size, cat_dim, noise_dim,e)
                 if batch_counter >= n_batch_per_epoch:
                     break

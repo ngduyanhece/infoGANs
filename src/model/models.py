@@ -1,3 +1,4 @@
+import keras
 from keras.models import Model
 from keras.layers.core import Flatten, Dense, Dropout, Activation, Lambda, Reshape
 from keras.layers.convolutional import Conv2D, Deconv2D, ZeroPadding2D, UpSampling2D
@@ -206,9 +207,3 @@ def load(model_name, cat_dim, noise_dim, img_dim, batch_size, dset="mnist"):
         # from keras.utils import plot_model
         # plot_model(model, to_file='../../figures/%s.png' % model_name, show_shapes=True, show_layer_names=True)
         return model
-
-
-if __name__ == '__main__':
-
-    m = generator_deconv((10,), (64,), (28, 28, 1), 2, model_name="generator_deconv", dset="mnist")
-    m.summary()
