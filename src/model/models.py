@@ -116,7 +116,7 @@ def generator_deconv(cat_dim, noise_dim, img_dim, batch_size, model_name="genera
     o_shape = (batch_size, s, s, output_channels)
     x = Deconv2D(output_channels, (4, 4), output_shape=o_shape, strides=(1, 1), padding="same")(x)
     x = BatchNormalization()(x)
-    x = Activation("tanh")(x)
+    x = Activation("sigmoid")(x)
 
     generator_model = Model(inputs=[cat_input, noise_input], outputs=[x], name=model_name)
 

@@ -66,17 +66,19 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
             for X_real_batch,Y_real_batch in zip(data_utils.gen_batch(X_real_train, batch_size),data_utils.gen_batch(Y_real_train, batch_size)):
 
                 # Create a batch to feed the discriminator model
-                X_disc, y_disc = data_utils.get_disc_batch(X_real_batch,Y_real_batch, generator_model, batch_counter, batch_size, cat_dim, noise_dim)
+                X_disc_fake, y_disc_fake, noise_sample = data_utils.get_disc_batch(X_real_batch,Y_real_batch, generator_model, batch_size, cat_dim, noise_dim,type="fake")
+                X_disc_real, y_disc_real = data_utils.get_disc_batch(X_real_batch,Y_real_batch, generator_model, batch_size, cat_dim, noise_dim,type="real")
 
                 # Update the discriminator
-                disc_loss = discriminator_model.train_on_batch(X_disc, [y_disc, Y_real_batch])
-
+                disc_loss_fake = discriminator_model.train_on_batch(X_disc_fake, [y_disc_fake, Y_real_batch])
+                disc_loss_real = discriminator_model.train_on_batch(X_disc_real, [y_disc_real, Y_real_batch])
+                disc_loss = disc_loss_fake + disc_loss_real
                 # Create a batch to feed the generator model
-                X_noise, y_gen = data_utils.get_gen_batch(batch_size, cat_dim, noise_dim)
+                # X_noise, y_gen = data_utils.get_gen_batch(batch_size, cat_dim, noise_dim)
 
                 # Freeze the discriminator
                 discriminator_model.trainable = False
-                gen_loss = DCGAN_model.train_on_batch([Y_real_batch, X_noise], [y_gen, Y_real_batch])
+                gen_loss = DCGAN_model.train_on_batch([Y_real_batch, noise_sample], [y_disc_real, Y_real_batch])
                 # Unfreeze the discriminator
                 discriminator_model.trainable = True
                 # training validation
@@ -91,7 +93,7 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
                                                 ("Q acc", acc_train)])
 
                 # Save images for visualization
-                if batch_counter % (n_batch_per_epoch / 2) == 0:
+                if batch_counter % (n_batch_per_epoch / 2) == 0 and e % 100 == 0:
                     data_utils.plot_generated_batch(X_real_batch, generator_model, batch_size, cat_dim, noise_dim,e)
                 if batch_counter >= n_batch_per_epoch:
                     break
@@ -101,14 +103,14 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
             _, p_Y_test = discriminator_model.predict(X_real_test,batch_size=X_real_test.shape[0])
             acc_test = data_utils.accuracy(p_Y_test, Y_real_test)
             print("Epoch: {} Accuracy: {}".format(e +1 , acc_test))
-            if e % 100 == 0:
-                gen_weights_path = os.path.join('../../models/IG/gen_weights_epoch%s.h5' % (e))
+            if e % 1000 == 0:
+                gen_weights_path = os.path.join('../../models/IG/gen_weights.h5')
                 generator_model.save_weights(gen_weights_path, overwrite=True)
 
-                disc_weights_path = os.path.join('../../models/IG/disc_weights_epoch%s.h5' % (e))
+                disc_weights_path = os.path.join('../../models/IG/disc_weights.h5')
                 discriminator_model.save_weights(disc_weights_path, overwrite=True)
 
-                DCGAN_weights_path = os.path.join('../../models/IG/DCGAN_weights_epoch%s.h5' % (e))
+                DCGAN_weights_path = os.path.join('../../models/IG/DCGAN_weights.h5')
                 DCGAN_model.save_weights(DCGAN_weights_path, overwrite=True)
 
     except KeyboardInterrupt:

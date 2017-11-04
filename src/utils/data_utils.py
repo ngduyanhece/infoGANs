@@ -55,10 +55,10 @@ def sample_cat(batch_size, cat_dim):
     y[np.arange(batch_size), random_y] = 1
     return y
 
-def get_disc_batch(X_real_batch, Y_real_batch, generator_model, batch_counter, batch_size, cat_dim, noise_dim, noise_scale=0.5,label_smoothing=False):
+def get_disc_batch(X_real_batch, Y_real_batch, generator_model, batch_size, cat_dim, noise_dim, noise_scale=0.5,type="real",label_smoothing=False):
 
     # Create X_disc: alternatively only generated or real images
-    if batch_counter % 2 == 0:
+    if type == "fake":
         # Pass noise to the generator
         # y_cat = sample_cat(batch_size, cat_dim)
         # get some labels of the X_real_batch
@@ -68,7 +68,7 @@ def get_disc_batch(X_real_batch, Y_real_batch, generator_model, batch_counter, b
         # Produce an output
         X_disc = generator_model.predict([Y_real_batch, noise_input],batch_size=batch_size)
         y_disc = np.zeros((X_disc.shape[0], 1), dtype=np.uint8)
-        # y_disc[:, 0] = 1
+        return X_disc, y_disc, noise_input
     else:
         # batch_slice = int(batch_size / 2)
         X_disc = X_real_batch
@@ -79,9 +79,9 @@ def get_disc_batch(X_real_batch, Y_real_batch, generator_model, batch_counter, b
             y_disc[:, 0] = np.random.uniform(low=0.9, high=1, size=y_disc.shape[0])
         else:
             y_disc[:, 0] = 1
+        return X_disc, y_disc
 
     # return X_disc, y_disc, y_cat
-    return X_disc, y_disc
 
 def get_gen_batch(batch_size, cat_dim, noise_dim, noise_scale=0.5):
 
