@@ -55,7 +55,7 @@ def sample_cat(batch_size, cat_dim):
     y[np.arange(batch_size), random_y] = 1
     return y
 
-def get_disc_batch(X_real_batch, Y_real_batch, generator_model, batch_counter, batch_size, cat_dim, noise_dim, noise_scale=0.5,label_smoothing=True):
+def get_disc_batch(X_real_batch, Y_real_batch, generator_model, batch_counter, batch_size, cat_dim, noise_dim, noise_scale=0.5,label_smoothing=False):
 
     # Create X_disc: alternatively only generated or real images
     if batch_counter % 2 == 0:
@@ -122,7 +122,7 @@ def plot_generated_batch(X_real, generator_model, batch_size, cat_dim, noise_dim
     plt.savefig("../../figures/current_batch_%s.png" %(counter))
     plt.clf()
     plt.close()
-def accuracy(p_y,y):
-    labels = np.argmax(y,axis=1)
-    p_labels = np.argmax(p_y)
+def accuracy(p_y,y_ind):
+    labels = np.argmax(y_ind,axis=1)
+    p_labels = np.argmax(p_y,axis=1)
     return np.mean(p_labels == labels)

@@ -57,7 +57,7 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
         discriminator_model.compile(loss=list_losses, loss_weights=list_weights, optimizer=opt_discriminator)
         # Start training
         print("Start training")
-        for e in range(nb_epoch):
+        for e in range(nb_epoch+1):
             # Initialize progbar and batch counter
             progbar = generic_utils.Progbar(epoch_size)
             batch_counter = 1
@@ -80,13 +80,14 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
                 # Unfreeze the discriminator
                 discriminator_model.trainable = True
                 # training validation
-                _, p_Y_train = discriminator_model.predict(X_real_batch, batch_size=batch_size)
+                p_real, p_Y_train = discriminator_model.predict(X_real_batch, batch_size=batch_size)
                 acc_train = data_utils.accuracy(p_Y_train, Y_real_train)
                 batch_counter += 1
                 progbar.add(batch_size, values=[("D tot", disc_loss[0]),
                                                 ("D cat", disc_loss[2]),
                                                 ("G tot", gen_loss[0]),
                                                 ("G cat", gen_loss[2]),
+                                                ("P Real:", p_real),
                                                 ("Q acc", acc_train)])
 
                 # Save images for visualization
@@ -100,15 +101,15 @@ def train(cat_dim,noise_dim,batch_size,n_batch_per_epoch,nb_epoch,dset="mnist"):
             _, p_Y_test = discriminator_model.predict(X_real_test,batch_size=X_real_test.shape[0])
             acc_test = data_utils.accuracy(p_Y_test, Y_real_test)
             print("Epoch: {} Accuracy: {}".format(e +1 , acc_test))
-            # if e % 5 == 0:
-            #     gen_weights_path = os.path.join('../../models/IG/gen_weights_epoch%s.h5' % (e))
-            #     generator_model.save_weights(gen_weights_path, overwrite=True)
-            #
-            #     disc_weights_path = os.path.join('../../models/IG/disc_weights_epoch%s.h5' % (e))
-            #     discriminator_model.save_weights(disc_weights_path, overwrite=True)
-            #
-            #     DCGAN_weights_path = os.path.join('../../models/IG/DCGAN_weights_epoch%s.h5' % (e))
-            #     DCGAN_model.save_weights(DCGAN_weights_path, overwrite=True)
+            if e % 100 == 0:
+                gen_weights_path = os.path.join('../../models/IG/gen_weights_epoch%s.h5' % (e))
+                generator_model.save_weights(gen_weights_path, overwrite=True)
+
+                disc_weights_path = os.path.join('../../models/IG/disc_weights_epoch%s.h5' % (e))
+                discriminator_model.save_weights(disc_weights_path, overwrite=True)
+
+                DCGAN_weights_path = os.path.join('../../models/IG/DCGAN_weights_epoch%s.h5' % (e))
+                DCGAN_model.save_weights(DCGAN_weights_path, overwrite=True)
 
     except KeyboardInterrupt:
         pass
