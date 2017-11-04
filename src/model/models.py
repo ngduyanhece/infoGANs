@@ -50,11 +50,11 @@ def generator_upsampling(cat_dim, noise_dim, img_dim, model_name="generator_upsa
     for i in range(nb_upconv):
         x = UpSampling2D(size=(2, 2))(x)
         nb_filters = int(f / (2 ** (i + 1)))
-        x = Conv2D(nb_filters, (3, 3), padding="same")(x)
+        x = Conv2D(nb_filters, (4, 4), padding="same")(x)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
 
-    x = Conv2D(output_channels, (3, 3), name="gen_Conv2D_final", padding="same", activation='tanh')(x)
+    x = Conv2D(output_channels, (4, 4), name="gen_Conv2D_final", padding="same", activation='tanh')(x)
 
     generator_model = Model(inputs=[cat_input, cont_input, noise_input], outputs=[x], name=model_name)
 
@@ -102,17 +102,20 @@ def generator_deconv(cat_dim, noise_dim, img_dim, batch_size, model_name="genera
 
     # Transposed conv blocks
     for i in range(nb_upconv - 1):
+        x = UpSampling2D(size=(2, 2))(x)
         nb_filters = int(f / (2 ** (i + 1)))
         s = start_dim * (2 ** (i + 1))
         o_shape = (batch_size, s, s, nb_filters)
-        x = Deconv2D(nb_filters, (3, 3), output_shape=o_shape, strides=(2, 2), padding="same")(x)
+        x = Deconv2D(nb_filters, (4, 4), output_shape=o_shape, strides=(1, 1), padding="same")(x)
         x = BatchNormalization()(x)
         x = Activation("relu")(x)
 
     # Last block
+    x = UpSampling2D(size=(2, 2))(x)
     s = start_dim * (2 ** (nb_upconv))
     o_shape = (batch_size, s, s, output_channels)
-    x = Deconv2D(output_channels, (3, 3), output_shape=o_shape, strides=(2, 2), padding="same")(x)
+    x = Deconv2D(output_channels, (4, 4), output_shape=o_shape, strides=(1, 1), padding="same")(x)
+    x = BatchNormalization()(x)
     x = Activation("tanh")(x)
 
     generator_model = Model(inputs=[cat_input, noise_input], outputs=[x], name=model_name)
@@ -139,26 +142,26 @@ def DCGAN_discriminator(cat_dim, img_dim, model_name="DCGAN_discriminator", dset
         list_f = [64, 128, 256]
 
     # First conv
-    x = Conv2D(64, (3, 3), strides=(2, 2), name="disc_Conv2D_1", padding="same")(disc_input)
-    x = LeakyReLU(0.2)(x)
+    x = Conv2D(64, (4, 4), strides=(2, 2), name="disc_Conv2D_1", padding="same")(disc_input)
+    x = LeakyReLU(0.1)(x)
 
     # Next convs
     for i, f in enumerate(list_f):
         name = "disc_Conv2D_%s" % (i + 2)
-        x = Conv2D(f, (3, 3), strides=(2, 2), name=name, padding="same")(x)
+        x = Conv2D(f, (4, 4), strides=(2, 2), name=name, padding="same")(x)
         x = BatchNormalization()(x)
-        x = LeakyReLU(0.2)(x)
+        x = LeakyReLU(0.1)(x)
 
     x = Flatten()(x)
     x = Dense(1024)(x)
     x = BatchNormalization()(x)
-    x = LeakyReLU(0.2)(x)
+    x = LeakyReLU(0.1)(x)
 
 
     # More processing for auxiliary Q
     x_Q = Dense(128)(x)
     x_Q = BatchNormalization()(x_Q)
-    x_Q = LeakyReLU(0.2)(x_Q)
+    x_Q = LeakyReLU(0.1)(x_Q)
     x_Q_Y = Dense(cat_dim[0], activation='softmax', name="Q_cat_out")(x_Q)
 
     # Create discriminator model

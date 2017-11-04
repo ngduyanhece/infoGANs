@@ -2,7 +2,7 @@ import train
 if __name__ == "__main__":
     cat_dim = (10,)
     noise_dim = (100,)
-    batch_size = 64
+    batch_size = 128
     n_batch_per_epoch = 500
     nb_epoch = 1000
     #start to train
